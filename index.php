@@ -71,6 +71,11 @@
 <body>
     <div style="position: relative; height: 0;">
         <button class="show-hide-btn" id="toggle-add-event" type="button" onclick="toggleAddEvent()">Hide Add Event</button>
+        <a href="admin.php" style="position:absolute; left:0; top:0; z-index:2;">
+            <button type="button" style="background:#ff9800; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:1em;">
+                Admin Page
+            </button>
+        </a>
     </div>
     <div id="add-event-section" style="display:none;">
         <h2>Add Event</h2>
@@ -125,8 +130,9 @@
                     const select = document.getElementById('person-select');
                     select.innerHTML = '<option value="">Select Person</option>';
                     persons.forEach(person => {
-                        const opt = document.createElement('option');
-                        opt.value = person.id || person.name;
+                        // Save person name as value (not id)
+                        opt = document.createElement('option');
+                        opt.value = person.name;
                         opt.textContent = person.name;
                         select.appendChild(opt);
                     });

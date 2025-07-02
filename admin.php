@@ -31,6 +31,7 @@ if (empty($_SESSION['admin_logged_in'])):
         .login-box input { width: 100%; margin-bottom: 12px; padding: 8px; }
         .login-box button { width: 100%; padding: 8px; background: #2196f3; color: #fff; border: none; border-radius: 4px; }
         .error { color: #d32f2f; margin-bottom: 12px; }
+        .back-btn { background: #2196f3; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 16px; width: 100%; }
     </style>
 </head>
 <body>
@@ -42,6 +43,7 @@ if (empty($_SESSION['admin_logged_in'])):
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
+        <a href="index.php"><button type="button" class="back-btn" style="margin-top:8px;">&larr; Back to Calendar</button></a>
     </div>
 </body>
 </html>
@@ -73,6 +75,7 @@ $events = $db->query("SELECT * FROM events ORDER BY start DESC")->fetchAll(PDO::
         th { background: #f0f0f0; }
         .logout-btn { float: right; background: #d32f2f; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
         .delete-btn { background: #d32f2f; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
+        .back-btn { background: #2196f3; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 16px; }
     </style>
 </head>
 <body>
@@ -80,6 +83,7 @@ $events = $db->query("SELECT * FROM events ORDER BY start DESC")->fetchAll(PDO::
         <form method="post" style="float:right;">
             <button class="logout-btn" name="logout" type="submit">Logout</button>
         </form>
+        <a href="index.php"><button type="button" class="back-btn">&larr; Back to Calendar</button></a>
         <h2>Event Management</h2>
         <table>
             <thead>
