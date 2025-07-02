@@ -96,30 +96,34 @@
             Team Calendar
             <div id="week-range" style="font-size:1em; color:#555; margin-top:4px;"></div>
             <button class="today-btn" onclick="goToToday()" type="button">Today</button>
+            <button class="today-btn" onclick="switchView()" type="button" id="switch-view-btn">Monthly View</button>
         </div>
         <button class="arrow-btn" id="right-arrow-btn" onclick="changeWeek(1)" title="Next Week">&#8594;</button>
     </div>
-    <table id="calendar">
-        <thead>
-            <tr>
-                <th>Sunday</th>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-                <th>Saturday</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr id="week-row">
-                <!-- Days will be filled by JS -->
-            </tr>
-        </tbody>
-    </table>
+    <div id="calendar-container">
+        <table id="calendar">
+            <thead>
+                <tr>
+                    <th>Sunday</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="week-row">
+                    <!-- Days will be filled by JS -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <script>
         let currentDate = new Date();
         let persons = [];
+        let currentView = 'week';
 
         // Load persons from JSON file and populate the select
         function loadPersons() {
@@ -213,9 +217,132 @@
             return found ? found.name : personValue;
         }
 
+        function switchView() {
+            if (currentView === 'week') {
+                currentView = 'month';
+                document.getElementById('switch-view-btn').textContent = 'Weekly View';
+                renderMonthCalendar();
+            } else {
+                currentView = 'week';
+                document.getElementById('switch-view-btn').textContent = 'Monthly View';
+                // Restore weekly calendar table
+                document.getElementById('calendar-container').innerHTML = `
+                    <table id="calendar">
+                        <thead>
+                            <tr>
+                                <th>Sunday</th>
+                                <th>Monday</th>
+                                <th>Tuesday</th>
+                                <th>Wednesday</th>
+                                <th>Thursday</th>
+                                <th>Friday</th>
+                                <th>Saturday</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="week-row"></tr>
+                        </tbody>
+                    </table>
+                `;
+                renderCalendar();
+            }
+        }
+
+        function renderMonthCalendar() {
+            const container = document.getElementById('calendar-container');
+            const today = new Date();
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const numDays = lastDay.getDate();
+            const startDay = firstDay.getDay(); // 0=Sunday
+
+            // Build table
+            let html = `<table id="calendar">
+                <thead>
+                    <tr>
+                        <th>Sunday</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            let day = 1;
+            for (let week = 0; week < 6; week++) {
+                html += '<tr>';
+                for (let d = 0; d < 7; d++) {
+                    if ((week === 0 && d < startDay) || day > numDays) {
+                        html += '<td></td>';
+                    } else {
+                        const cellDate = new Date(year, month, day);
+                        const isToday =
+                            cellDate.getFullYear() === today.getFullYear() &&
+                            cellDate.getMonth() === today.getMonth() &&
+                            cellDate.getDate() === today.getDate();
+                        html += `<td${isToday ? ' class="today-cell"' : ''}>
+                            <div style="text-align:center;">
+                                <strong>${cellDate.toLocaleDateString('en-US', { day: 'numeric' })}</strong>
+                            </div>
+                            <div class="events" data-date="${cellDate.toISOString().slice(0,10)}"></div>
+                        </td>`;
+                        day++;
+                    }
+                }
+                html += '</tr>';
+                if (day > numDays) break;
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+
+            // Set month range under title
+            const weekRange = document.getElementById('week-range');
+            weekRange.textContent = `${firstDay.toLocaleDateString()} - ${lastDay.toLocaleDateString()}`;
+
+            fetchMonthEvents(year, month);
+        }
+
+        function fetchMonthEvents(year, month) {
+            // Get first and last day of month
+            const firstDay = new Date(year, month, 1);
+            fetch('calendar.php?date=' + firstDay.toISOString().slice(0,10) + '&view=month')
+                .then(res => res.json())
+                .then(events => {
+                    // Place events in correct cell
+                    events.forEach(ev => {
+                        const dateStr = ev.start.slice(0,10);
+                        const cell = document.querySelector(`.events[data-date="${dateStr}"]`);
+                        if (cell) {
+                            const personName = ev.person ? `<div style="font-size:0.95em;color:#1976d2;">👤 ${getPersonName(ev.person)}</div>` : '';
+                            const desc = ev.description ? `<div style="font-size:0.95em;color:#555;">${ev.description}</div>` : '';
+                            const div = document.createElement('div');
+                            div.className = 'event';
+                            div.innerHTML =
+                                `<div><strong>${ev.title}</strong> (${ev.start.slice(11,16)}-${ev.end.slice(11,16)})</div>
+                                 ${desc}
+                                 ${personName}`;
+                            cell.appendChild(div);
+                        }
+                    });
+                });
+        }
+
+        // Update changeWeek to work for both views
         function changeWeek(offset) {
-            currentDate.setDate(currentDate.getDate() + offset * 7);
-            renderCalendar();
+            if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() + offset * 7);
+                renderCalendar();
+            } else {
+                currentDate.setMonth(currentDate.getMonth() + offset);
+                renderMonthCalendar();
+            }
         }
 
         document.getElementById('event-form').onsubmit = function(e) {
@@ -244,9 +371,14 @@
             });
         };
 
+        // Update goToToday for both views
         function goToToday() {
             currentDate = new Date();
-            renderCalendar();
+            if (currentView === 'week') {
+                renderCalendar();
+            } else {
+                renderMonthCalendar();
+            }
         }
 
         function toggleAddEvent() {
