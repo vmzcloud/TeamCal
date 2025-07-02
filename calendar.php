@@ -5,12 +5,12 @@ require_once __DIR__ . '/db.php';
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $date = $_GET['date'] ?? date('Y-m-d');
     if (isset($_GET['view']) && $_GET['view'] === 'month') {
-        // Monthly view: fetch all events in the month
+        // Monthly view: fetch all events whose start date is in the month
         $dt = new DateTime($date);
         $monthStart = $dt->format('Y-m-01 00:00:00');
         $monthEnd = $dt->format('Y-m-t 23:59:59');
-        $stmt = $db->prepare("SELECT * FROM events WHERE (start BETWEEN ? AND ?) OR (date(start) BETWEEN ? AND ?)");
-        $stmt->execute([$monthStart, $monthEnd, $dt->format('Y-m-01'), $dt->format('Y-m-t')]);
+        $stmt = $db->prepare("SELECT * FROM events WHERE start >= ? AND start <= ?");
+        $stmt->execute([$monthStart, $monthEnd]);
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
         header('Content-Type: application/json');
         echo json_encode($events);
