@@ -77,8 +77,19 @@ if (isset($_POST['delete_id'])) {
     $stmt->execute([$event_id]);
 }
 
-// Fetch all events
-$events = $db->query("SELECT * FROM events ORDER BY start DESC")->fetchAll(PDO::FETCH_ASSOC);
+// --- Month filter logic ---
+$selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+$month_start = $selected_month . '-01 00:00:00';
+$month_end = date('Y-m-t 23:59:59', strtotime($selected_month . '-01'));
+
+// Get all months with events for dropdown
+$months_stmt = $db->query("SELECT DISTINCT strftime('%Y-%m', start) as ym FROM events ORDER BY ym DESC");
+$months = $months_stmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Fetch events for selected month
+$stmt = $db->prepare("SELECT * FROM events WHERE start >= ? AND start <= ? ORDER BY start DESC");
+$stmt->execute([$month_start, $month_end]);
+$events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Pagination for audit log
 $audit_page = isset($_GET['audit_page']) ? max(1, intval($_GET['audit_page'])) : 1;
@@ -105,6 +116,8 @@ $audit_has_next = ($audit_page * $audit_limit) < $audit_total;
         .audit-table th, .audit-table td { font-size: 0.95em; }
         .audit-nav { margin-top: 10px; text-align: right; }
         .audit-nav button { background: #2196f3; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; }
+        .month-select-form { margin-bottom: 18px; }
+        .month-select-form select { font-size: 1em; padding: 4px 8px; }
     </style>
 </head>
 <body>
@@ -114,6 +127,16 @@ $audit_has_next = ($audit_page * $audit_limit) < $audit_total;
         </form>
         <a href="index.php"><button type="button" class="back-btn">&larr; Back to Calendar</button></a>
         <h2>Event Management</h2>
+        <form method="get" class="month-select-form">
+            <label for="month">Show events for month:</label>
+            <select name="month" id="month" onchange="this.form.submit()">
+                <?php foreach ($months as $ym): ?>
+                    <option value="<?=htmlspecialchars($ym)?>"<?= $ym === $selected_month ? ' selected' : '' ?>>
+                        <?=date('F Y', strtotime($ym . '-01'))?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </form>
         <table>
             <thead>
                 <tr>
