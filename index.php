@@ -160,10 +160,11 @@
             // Render header with day and date
             const headerRow = document.getElementById('calendar-header-row');
             headerRow.innerHTML = '';
-            weekDates.forEach(dt => {
+            weekDates.forEach((dt, idx) => {
                 const th = document.createElement('th');
+                const isSunday = idx === 0;
                 th.innerHTML = `<div>
-                    <div><strong>${dt.toLocaleDateString('en-US', { weekday: 'long' })}</strong></div>
+                    <div><strong${isSunday ? ' style="color:#d32f2f;"' : ''}>${dt.toLocaleDateString('en-US', { weekday: 'long' })}</strong></div>
                     <div style="font-size:0.95em;color:#555;">${dt.toLocaleDateString()}</div>
                 </div>`;
                 headerRow.appendChild(th);
