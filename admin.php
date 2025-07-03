@@ -79,6 +79,14 @@ if (isset($_POST['delete_id'])) {
 
 // Fetch all events
 $events = $db->query("SELECT * FROM events ORDER BY start DESC")->fetchAll(PDO::FETCH_ASSOC);
+
+// Pagination for audit log
+$audit_page = isset($_GET['audit_page']) ? max(1, intval($_GET['audit_page'])) : 1;
+$audit_limit = 10;
+$audit_offset = ($audit_page - 1) * $audit_limit;
+$audit_total = $db->query("SELECT COUNT(*) FROM audit_log")->fetchColumn();
+$audit_logs = $db->query("SELECT * FROM audit_log ORDER BY datetime DESC LIMIT $audit_limit OFFSET $audit_offset")->fetchAll(PDO::FETCH_ASSOC);
+$audit_has_next = ($audit_page * $audit_limit) < $audit_total;
 ?>
 <!DOCTYPE html>
 <html>
@@ -93,6 +101,10 @@ $events = $db->query("SELECT * FROM events ORDER BY start DESC")->fetchAll(PDO::
         .logout-btn { float: right; background: #d32f2f; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
         .delete-btn { background: #d32f2f; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
         .back-btn { background: #2196f3; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 16px; }
+        .audit-table { margin-top: 40px; }
+        .audit-table th, .audit-table td { font-size: 0.95em; }
+        .audit-nav { margin-top: 10px; text-align: right; }
+        .audit-nav button { background: #2196f3; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -135,6 +147,42 @@ $events = $db->query("SELECT * FROM events ORDER BY start DESC")->fetchAll(PDO::
             <?php endforeach; ?>
             </tbody>
         </table>
+
+        <h2 style="margin-top:40px;">Audit Log</h2>
+        <table class="audit-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Event ID</th>
+                    <th>Action</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>IP Address</th>
+                    <th>Date Time</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($audit_logs as $log): ?>
+                <tr>
+                    <td><?=htmlspecialchars($log['id'])?></td>
+                    <td><?=htmlspecialchars($log['event_id'])?></td>
+                    <td><?=htmlspecialchars($log['action'])?></td>
+                    <td><?=htmlspecialchars($log['title'])?></td>
+                    <td><?=htmlspecialchars($log['description'])?></td>
+                    <td><?=htmlspecialchars($log['ip_address'])?></td>
+                    <td><?=htmlspecialchars($log['datetime'])?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <div class="audit-nav">
+            <?php if ($audit_page > 1): ?>
+                <a href="?audit_page=<?=($audit_page-1)?>"><button>&larr; Previous</button></a>
+            <?php endif; ?>
+            <?php if ($audit_has_next): ?>
+                <a href="?audit_page=<?=($audit_page+1)?>"><button>Next &rarr;</button></a>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
 </html>
