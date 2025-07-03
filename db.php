@@ -9,7 +9,8 @@ $db->exec("CREATE TABLE IF NOT EXISTS events (
     description TEXT,
     start DATETIME NOT NULL,
     end DATETIME NOT NULL,
-    person TEXT
+    person TEXT,
+    location TEXT
 )");
 
 // Ensure the 'person' column exists in the events table
@@ -23,5 +24,18 @@ foreach ($cols as $col) {
 }
 if (!$hasPerson) {
     $db->exec("ALTER TABLE events ADD COLUMN person TEXT");
+}
+
+// Ensure the 'location' column exists in the events table
+$cols = $db->query("PRAGMA table_info(events)")->fetchAll(PDO::FETCH_ASSOC);
+$hasLocation = false;
+foreach ($cols as $col) {
+    if ($col['name'] === 'location') {
+        $hasLocation = true;
+        break;
+    }
+}
+if (!$hasLocation) {
+    $db->exec("ALTER TABLE events ADD COLUMN location TEXT");
 }
 ?>

@@ -19,13 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $stmt = $db->prepare("INSERT INTO events (title, description, start, end, person) VALUES (?, ?, ?, ?, ?)");
+    $stmt = $db->prepare("INSERT INTO events (title, description, start, end, person, location) VALUES (?, ?, ?, ?, ?, ?)");
     $stmt->execute([
         $data['title'],
         $data['description'] ?? '',
         $data['start'],
         $data['end'],
-        $data['person'] ?? ''
+        $data['person'] ?? '',
+        $data['location'] ?? ''
     ]);
     echo json_encode(['success' => true]);
     exit;
@@ -35,21 +36,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $stmt = $db->prepare("UPDATE events SET title=?, description=?, start=?, end=?, person=? WHERE id=?");
+    $stmt = $db->prepare("UPDATE events SET title=?, description=?, start=?, end=?, person=?, location=? WHERE id=?");
     $stmt->execute([
         $data['title'],
         $data['description'] ?? '',
         $data['start'],
         $data['end'],
         $data['person'] ?? '',
+        $data['location'] ?? '',
         $data['id']
     ]);
     echo json_encode(['success' => true]);
     exit;
 }
 ?>
-    $stmt = $db->prepare("UPDATE events SET title=?, description=?, start=?, end=?, person=? WHERE id=?");
-    $stmt->execute([
         $data['title'],
         $data['description'] ?? '',
         $data['start'],

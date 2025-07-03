@@ -70,7 +70,7 @@
 </head>
 <body>
     <div style="position: relative; height: 0;">
-        <button class="show-hide-btn" id="toggle-add-event" type="button" onclick="toggleAddEvent()">Hide Add Event</button>
+        <button class="show-hide-btn" id="toggle-add-event" type="button" onclick="toggleAddEvent()">Show Add Event</button>
         <a href="admin.php" style="position:absolute; left:0; top:0; z-index:2;">
             <button type="button" style="background:#ff9800; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:1em;">
                 Admin Page
@@ -83,6 +83,7 @@
             <input type="text" name="title" placeholder="Title" required>
             <input type="datetime-local" name="start" required>
             <input type="datetime-local" name="end" required>
+            <input type="text" name="location" placeholder="Location">
             <input type="text" name="description" placeholder="Description">
             <select name="person" id="person-select" required>
                 <option value="">Select Person</option>
@@ -96,7 +97,6 @@
             Team Calendar
             <div id="week-range" style="font-size:1em; color:#555; margin-top:4px;"></div>
             <button class="today-btn" onclick="goToToday()" type="button">Today</button>
-            <button class="today-btn" onclick="switchView()" type="button" id="switch-view-btn">Monthly View</button>
         </div>
         <button class="arrow-btn" id="right-arrow-btn" onclick="changeWeek(1)" title="Next Week">&#8594;</button>
     </div>
@@ -123,7 +123,6 @@
     <script>
         let currentDate = new Date();
         let persons = [];
-        let currentView = 'week';
 
         // Load persons from JSON file and populate the select
         function loadPersons() {
@@ -196,11 +195,13 @@
                         cell.innerHTML = '';
                         events.filter(ev => ev.start.slice(0,10) === day).forEach(ev => {
                             const personName = ev.person ? `<div style="font-size:0.95em;color:#1976d2;">👤 ${getPersonName(ev.person)}</div>` : '';
+                            const location = ev.location ? `<div style="font-size:0.95em;color:#388e3c;">📍 ${ev.location}</div>` : '';
                             const desc = ev.description ? `<div style="font-size:0.95em;color:#555;">${ev.description}</div>` : '';
                             const div = document.createElement('div');
                             div.className = 'event';
                             div.innerHTML = 
                                 `<div><strong>${ev.title}</strong> (${ev.start.slice(11,16)}-${ev.end.slice(11,16)})</div>
+                                 ${location}
                                  ${desc}
                                  ${personName}`;
                             cell.appendChild(div);
@@ -217,132 +218,9 @@
             return found ? found.name : personValue;
         }
 
-        function switchView() {
-            if (currentView === 'week') {
-                currentView = 'month';
-                document.getElementById('switch-view-btn').textContent = 'Weekly View';
-                renderMonthCalendar();
-            } else {
-                currentView = 'week';
-                document.getElementById('switch-view-btn').textContent = 'Monthly View';
-                // Restore weekly calendar table
-                document.getElementById('calendar-container').innerHTML = `
-                    <table id="calendar">
-                        <thead>
-                            <tr>
-                                <th>Sunday</th>
-                                <th>Monday</th>
-                                <th>Tuesday</th>
-                                <th>Wednesday</th>
-                                <th>Thursday</th>
-                                <th>Friday</th>
-                                <th>Saturday</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr id="week-row"></tr>
-                        </tbody>
-                    </table>
-                `;
-                renderCalendar();
-            }
-        }
-
-        function renderMonthCalendar() {
-            const container = document.getElementById('calendar-container');
-            const today = new Date();
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-
-            // Get first day of month and number of days
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const numDays = lastDay.getDate();
-            const startDay = firstDay.getDay(); // 0=Sunday
-
-            // Build table
-            let html = `<table id="calendar">
-                <thead>
-                    <tr>
-                        <th>Sunday</th>
-                        <th>Monday</th>
-                        <th>Tuesday</th>
-                        <th>Wednesday</th>
-                        <th>Thursday</th>
-                        <th>Friday</th>
-                        <th>Saturday</th>
-                    </tr>
-                </thead>
-                <tbody>
-            `;
-            let day = 1;
-            for (let week = 0; week < 6; week++) {
-                html += '<tr>';
-                for (let d = 0; d < 7; d++) {
-                    if ((week === 0 && d < startDay) || day > numDays) {
-                        html += '<td></td>';
-                    } else {
-                        const cellDate = new Date(year, month, day);
-                        const isToday =
-                            cellDate.getFullYear() === today.getFullYear() &&
-                            cellDate.getMonth() === today.getMonth() &&
-                            cellDate.getDate() === today.getDate();
-                        html += `<td${isToday ? ' class="today-cell"' : ''}>
-                            <div style="text-align:center;">
-                                <strong>${cellDate.toLocaleDateString('en-US', { day: 'numeric' })}</strong>
-                            </div>
-                            <div class="events" data-date="${cellDate.toISOString().slice(0,10)}"></div>
-                        </td>`;
-                        day++;
-                    }
-                }
-                html += '</tr>';
-                if (day > numDays) break;
-            }
-            html += '</tbody></table>';
-            container.innerHTML = html;
-
-            // Set month range under title
-            const weekRange = document.getElementById('week-range');
-            weekRange.textContent = `${firstDay.toLocaleDateString()} - ${lastDay.toLocaleDateString()}`;
-
-            fetchMonthEvents(year, month);
-        }
-
-        function fetchMonthEvents(year, month) {
-            // Get first and last day of month
-            const firstDay = new Date(year, month, 1);
-            fetch('calendar.php?date=' + firstDay.toISOString().slice(0,10) + '&view=month')
-                .then(res => res.json())
-                .then(events => {
-                    // Place events in correct cell
-                    events.forEach(ev => {
-                        const dateStr = ev.start.slice(0,10);
-                        const cell = document.querySelector(`.events[data-date="${dateStr}"]`);
-                        if (cell) {
-                            const personName = ev.person ? `<div style="font-size:0.95em;color:#1976d2;">👤 ${getPersonName(ev.person)}</div>` : '';
-                            const desc = ev.description ? `<div style="font-size:0.95em;color:#555;">${ev.description}</div>` : '';
-                            const div = document.createElement('div');
-                            div.className = 'event';
-                            div.innerHTML =
-                                `<div><strong>${ev.title}</strong> (${ev.start.slice(11,16)}-${ev.end.slice(11,16)})</div>
-                                 ${desc}
-                                 ${personName}`;
-                            cell.appendChild(div);
-                        }
-                    });
-                });
-        }
-
-        // Update changeWeek to work for both views
         function changeWeek(offset) {
-            if (currentView === 'week') {
-                currentDate.setDate(currentDate.getDate() + offset * 7);
-                renderCalendar();
-            } else {
-                currentDate.setMonth(currentDate.getMonth() + offset);
-                renderMonthCalendar();
-            }
+            currentDate.setDate(currentDate.getDate() + offset * 7);
+            renderCalendar();
         }
 
         document.getElementById('event-form').onsubmit = function(e) {
@@ -358,6 +236,7 @@
                 title: form.title.value,
                 start: form.start.value,
                 end: form.end.value,
+                location: form.location.value,
                 description: form.description.value,
                 person: form.person.value
             };
@@ -374,11 +253,7 @@
         // Update goToToday for both views
         function goToToday() {
             currentDate = new Date();
-            if (currentView === 'week') {
-                renderCalendar();
-            } else {
-                renderMonthCalendar();
-            }
+            renderCalendar();
         }
 
         function toggleAddEvent() {
