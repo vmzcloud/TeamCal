@@ -71,6 +71,11 @@
 <body>
     <div style="position: relative; height: 0;">
         <button class="show-hide-btn" id="toggle-add-event" type="button" onclick="toggleAddEvent()">Show Add Event</button>
+        <a href="contact-list.php" style="position:absolute; left:120px; top:0; z-index:2;">
+            <button type="button" style="background:#4caf50; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:1em;">
+                Contact List
+            </button>
+        </a>
         <a href="admin.php" style="position:absolute; left:0; top:0; z-index:2;">
             <button type="button" style="background:#ff9800; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:1em;">
                 Admin Page
@@ -94,6 +99,7 @@
         <div class="calendar-title">
             Team Calendar
             <div id="week-range" style="font-size:1em; color:#555; margin-top:4px;"></div>
+            <div id="week-dates" style="font-size:1em; color:#888; margin-top:2px;"></div>
             <button class="today-btn" onclick="goToToday()" type="button">Today</button>
         </div>
         <button class="arrow-btn" id="right-arrow-btn" onclick="changeWeek(1)" title="Next Week">&#8594;</button>
@@ -162,6 +168,12 @@
                 </div>`;
                 headerRow.appendChild(th);
             });
+
+            // Show week start/end date under the title
+            const weekDatesDiv = document.getElementById('week-dates');
+            const start = weekDates[0];
+            const end = weekDates[6];
+            weekDatesDiv.textContent = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
 
             const row = document.getElementById('week-row');
             row.innerHTML = '';
