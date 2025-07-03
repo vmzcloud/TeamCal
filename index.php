@@ -66,6 +66,20 @@
             background: #fffde7 !important;
             border: 2px solid #ffb300 !important;
         }
+        .add-btn {
+            background: #43a047;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        .add-btn:hover, .add-btn:focus {
+            background: #388e3c;
+        }
     </style>
 </head>
 <body>
@@ -91,7 +105,7 @@
             <input type="text" name="location" placeholder="Location">
             <input type="text" name="description" placeholder="Description">
             <div id="person-checkbox-group" style="margin-bottom:8px;"></div>
-            <button type="submit">Add</button>
+            <button type="submit" class="add-btn">Add</button>
         </form>
     </div>
     <div class="header-row">
