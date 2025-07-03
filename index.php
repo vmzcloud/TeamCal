@@ -101,14 +101,8 @@
     <div id="calendar-container">
         <table id="calendar">
             <thead>
-                <tr>
-                    <th>Sunday</th>
-                    <th>Monday</th>
-                    <th>Tuesday</th>
-                    <th>Wednesday</th>
-                    <th>Thursday</th>
-                    <th>Friday</th>
-                    <th>Saturday</th>
+                <tr id="calendar-header-row">
+                    <!-- Day and date will be filled by JS -->
                 </tr>
             </thead>
             <tbody>
@@ -157,14 +151,21 @@
 
         function renderCalendar() {
             const weekDates = getWeekDates(currentDate);
+            // Render header with day and date
+            const headerRow = document.getElementById('calendar-header-row');
+            headerRow.innerHTML = '';
+            weekDates.forEach(dt => {
+                const th = document.createElement('th');
+                th.innerHTML = `<div>
+                    <div><strong>${dt.toLocaleDateString('en-US', { weekday: 'long' })}</strong></div>
+                    <div style="font-size:0.95em;color:#555;">${dt.toLocaleDateString()}</div>
+                </div>`;
+                headerRow.appendChild(th);
+            });
+
             const row = document.getElementById('week-row');
             row.innerHTML = '';
             const today = new Date();
-            // Set week range under title
-            const weekRange = document.getElementById('week-range');
-            const start = weekDates[0];
-            const end = weekDates[6];
-            weekRange.textContent = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
             weekDates.forEach(dt => {
                 const isToday =
                     dt.getFullYear() === today.getFullYear() &&
@@ -172,11 +173,7 @@
                     dt.getDate() === today.getDate();
                 const td = document.createElement('td');
                 if (isToday) td.classList.add('today-cell');
-                td.innerHTML = `<div style="text-align:center;">
-                    <strong>${dt.toLocaleDateString('en-US', { weekday: 'long' })}</strong><br>
-                    <span style="font-size:0.95em;color:#555;">${dt.toLocaleDateString()}</span>
-                </div>
-                <div class="events"></div>`;
+                td.innerHTML = `<div class="events"></div>`;
                 row.appendChild(td);
             });
             fetchEvents(weekDates[0]);
@@ -198,7 +195,8 @@
                             const desc = ev.description ? `<div style="font-size:0.95em;color:#555;">${ev.description}</div>` : '';
                             const div = document.createElement('div');
                             div.className = 'event';
-                            div.innerHTML = 
+                            // Remove date from event, only show time and details
+                            div.innerHTML =
                                 `<div><strong>${ev.title}</strong> (${ev.start.slice(11,16)}-${ev.end.slice(11,16)})</div>
                                  ${location}
                                  ${desc}
