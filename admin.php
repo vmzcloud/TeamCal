@@ -92,6 +92,7 @@ $events = $db->query("SELECT * FROM events ORDER BY start DESC")->fetchAll(PDO::
                     <th>Title</th>
                     <th>Description</th>
                     <th>Person</th>
+                    <th>Location</th>
                     <th>Start</th>
                     <th>End</th>
                     <th>Action</th>
@@ -104,6 +105,7 @@ $events = $db->query("SELECT * FROM events ORDER BY start DESC")->fetchAll(PDO::
                     <td><?=htmlspecialchars($ev['title'])?></td>
                     <td><?=htmlspecialchars($ev['description'])?></td>
                     <td><?=htmlspecialchars($ev['person'])?></td>
+                    <td><?=htmlspecialchars($ev['location'])?></td>
                     <td><?=htmlspecialchars($ev['start'])?></td>
                     <td><?=htmlspecialchars($ev['end'])?></td>
                     <td>

@@ -85,9 +85,7 @@
             <input type="datetime-local" name="end" required>
             <input type="text" name="location" placeholder="Location">
             <input type="text" name="description" placeholder="Description">
-            <select name="person" id="person-select" required>
-                <option value="">Select Person</option>
-            </select>
+            <div id="person-checkbox-group" style="margin-bottom:8px;"></div>
             <button type="submit">Add</button>
         </form>
     </div>
@@ -126,18 +124,19 @@
 
         // Load persons from JSON file and populate the select
         function loadPersons() {
-            fetch('persons.json')
+            fetch('persons.json?ts=' + new Date().getTime()) // prevent cache
                 .then(res => res.json())
                 .then(data => {
                     persons = data;
-                    const select = document.getElementById('person-select');
-                    select.innerHTML = '<option value="">Select Person</option>';
+                    const group = document.getElementById('person-checkbox-group');
+                    group.innerHTML = '<label style="font-weight:bold;">Person:</label><br>';
                     persons.forEach(person => {
-                        // Save person name as value (not id)
-                        opt = document.createElement('option');
-                        opt.value = person.name;
-                        opt.textContent = person.name;
-                        select.appendChild(opt);
+                        const id = 'person_' + person.name.replace(/\s+/g, '_');
+                        group.innerHTML += `
+                            <label style="margin-right:12px;">
+                                <input type="checkbox" name="person" value="${person.name}" id="${id}"> ${person.name}
+                            </label>
+                        `;
                     });
                 });
         }
@@ -232,13 +231,15 @@
                 alert('End date/time cannot be earlier than start date/time.');
                 return;
             }
+            // Get checked persons as array and join with comma
+            const checked = Array.from(document.querySelectorAll('#person-checkbox-group input[type="checkbox"]:checked')).map(cb => cb.value);
             const data = {
                 title: form.title.value,
                 start: form.start.value,
                 end: form.end.value,
                 location: form.location.value,
                 description: form.description.value,
-                person: form.person.value
+                person: checked.join(', ')
             };
             fetch('calendar.php', {
                 method: 'POST',
@@ -247,6 +248,8 @@
             }).then(() => {
                 renderCalendar();
                 form.reset();
+                // Uncheck all checkboxes after submit
+                document.querySelectorAll('#person-checkbox-group input[type="checkbox"]').forEach(cb => cb.checked = false);
             });
         };
 
