@@ -210,19 +210,29 @@
             fetch('calendar.php?date=' + sunday.toISOString().slice(0,10))
                 .then(res => res.json())
                 .then(events => {
+                    // Use local time for comparison
                     const weekDates = getWeekDates(currentDate);
                     const row = document.getElementById('week-row');
                     for (let i = 0; i < 7; i++) {
-                        const day = weekDates[i].toISOString().slice(0,10);
+                        // Get YYYY-MM-DD in local time for the cell
+                        const day = weekDates[i].getFullYear() + '-' +
+                                    String(weekDates[i].getMonth() + 1).padStart(2, '0') + '-' +
+                                    String(weekDates[i].getDate()).padStart(2, '0');
                         const cell = row.children[i].querySelector('.events');
                         cell.innerHTML = '';
-                        events.filter(ev => ev.start.slice(0,10) === day).forEach(ev => {
+                        events.filter(ev => {
+                            // Parse event start as local date
+                            const evDate = new Date(ev.start);
+                            const evDay = evDate.getFullYear() + '-' +
+                                          String(evDate.getMonth() + 1).padStart(2, '0') + '-' +
+                                          String(evDate.getDate()).padStart(2, '0');
+                            return evDay === day;
+                        }).forEach(ev => {
                             const personName = ev.person ? `<div style="font-size:0.95em;color:#1976d2;">👤 ${getPersonName(ev.person)}</div>` : '';
                             const location = ev.location ? `<div style="font-size:0.95em;color:#388e3c;">📍 ${ev.location}</div>` : '';
                             const desc = ev.description ? `<div style="font-size:0.95em;color:#555;">${ev.description}</div>` : '';
                             const div = document.createElement('div');
                             div.className = 'event';
-                            // Remove date from event, only show time and details
                             div.innerHTML =
                                 `<div><strong>${ev.title}</strong> (${ev.start.slice(11,16)}-${ev.end.slice(11,16)})</div>
                                  ${location}
