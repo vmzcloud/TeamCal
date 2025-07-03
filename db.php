@@ -38,4 +38,15 @@ foreach ($cols as $col) {
 if (!$hasLocation) {
     $db->exec("ALTER TABLE events ADD COLUMN location TEXT");
 }
+
+// Create audit_log table if not exists (add title, description columns)
+$db->exec("CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER,
+    action TEXT NOT NULL,
+    ip_address TEXT NOT NULL,
+    datetime DATETIME NOT NULL,
+    title TEXT,
+    description TEXT
+)");
 ?>

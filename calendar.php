@@ -15,6 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     exit;
 }
 
+function insert_audit_log($event_id, $action, $title = '', $description = '') {
+    global $db;
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $now = date('Y-m-d H:i:s');
+    $stmt = $db->prepare("INSERT INTO audit_log (event_id, action, ip_address, datetime, title, description) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$event_id, $action, $ip, $now, $title, $description]);
+}
+
 // Add event (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -28,6 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data['person'] ?? '',
         $data['location'] ?? ''
     ]);
+    $event_id = $db->lastInsertId();
+    insert_audit_log($event_id, 'create', $data['title'], $data['description'] ?? '');
     echo json_encode(['success' => true]);
     exit;
 }
@@ -49,14 +59,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     echo json_encode(['success' => true]);
     exit;
 }
-?>
-        $data['title'],
-        $data['description'] ?? '',
-        $data['start'],
-        $data['end'],
-        $data['person'] ?? '',
-        $data['id']
-    ]);
+
+// Delete event (DELETE)
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $event_id = $data['id'] ?? null;
+    $title = '';
+    $description = '';
+    if ($event_id) {
+        // Fetch event info for audit before delete
+        $stmt = $db->prepare("SELECT title, description FROM events WHERE id=?");
+        $stmt->execute([$event_id]);
+        $event = $stmt->fetch(PDO::FETCH_ASSOC);
+        $title = $event['title'] ?? '';
+        $description = $event['description'] ?? '';
+        insert_audit_log($event_id, 'delete', $title, $description);
+    }
+    $stmt = $db->prepare("DELETE FROM events WHERE id=?");
+    $stmt->execute([$event_id]);
     echo json_encode(['success' => true]);
     exit;
 }

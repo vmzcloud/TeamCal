@@ -54,10 +54,27 @@ endif;
 // If logged in, show event management
 require_once __DIR__ . '/db.php';
 
+// Add audit log function
+function insert_audit_log($event_id, $action, $title = '', $description = '') {
+    global $db;
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $now = date('Y-m-d H:i:s');
+    $stmt = $db->prepare("INSERT INTO audit_log (event_id, action, ip_address, datetime, title, description) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$event_id, $action, $ip, $now, $title, $description]);
+}
+
 // Handle delete
 if (isset($_POST['delete_id'])) {
+    $event_id = $_POST['delete_id'];
+    // Fetch event info for audit
+    $stmt = $db->prepare("SELECT title, description FROM events WHERE id=?");
+    $stmt->execute([$event_id]);
+    $event = $stmt->fetch(PDO::FETCH_ASSOC);
+    $title = $event['title'] ?? '';
+    $description = $event['description'] ?? '';
+    insert_audit_log($event_id, 'delete', $title, $description);
     $stmt = $db->prepare("DELETE FROM events WHERE id=?");
-    $stmt->execute([$_POST['delete_id']]);
+    $stmt->execute([$event_id]);
 }
 
 // Fetch all events
