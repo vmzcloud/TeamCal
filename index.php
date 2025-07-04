@@ -230,14 +230,13 @@
             fetchEvents(weekDates[0], weekDates);
         }
 
-        // Update fetchEvents to handle special_days
+        // Update fetchEvents to add edit icon
         function fetchEvents(sunday, weekDates) {
             fetch('calendar.php?date=' + sunday.toISOString().slice(0,10))
                 .then(res => res.json())
                 .then(data => {
                     const events = data.events || [];
                     const special_days = data.special_days || [];
-                    // Map special days by date for quick lookup
                     const specialMap = {};
                     special_days.forEach(sd => {
                         specialMap[sd.date] = sd.description;
@@ -252,7 +251,6 @@
                         const cell = row.children[i].querySelector('.events');
                         const td = row.children[i];
                         cell.innerHTML = '';
-                        // Mark holiday cell
                         if (specialMap[day]) {
                             td.style.background = '#ffebee';
                             td.style.border = '2px solid #d32f2f';
@@ -272,10 +270,15 @@
                             const personName = ev.person ? `<div style="font-size:0.95em;color:#1976d2;">👤 ${getPersonName(ev.person)}</div>` : '';
                             const location = ev.location ? `<div style="font-size:0.95em;color:#388e3c;">📍 ${ev.location}</div>` : '';
                             const desc = ev.description ? `<div style="font-size:0.95em;color:#555;">${ev.description}</div>` : '';
+                            // Add edit icon (link to edit_event.php?id=...)
+                            const editIcon = `<a href="edit_event.php?id=${encodeURIComponent(ev.id)}" title="Edit Event" style="margin-left:6px;vertical-align:middle;"><span style="font-size:1.1em;cursor:pointer;">&#9998;</span></a>`;
                             const div = document.createElement('div');
                             div.className = 'event';
                             div.innerHTML =
-                                `<div><strong>${ev.title}</strong> (${ev.start.slice(11,16)}-${ev.end.slice(11,16)})</div>
+                                `<div>
+                                    <strong>${ev.title}</strong> (${ev.start.slice(11,16)}-${ev.end.slice(11,16)})
+                                    ${editIcon}
+                                 </div>
                                  ${location}
                                  ${desc}
                                  ${personName}`;
