@@ -100,7 +100,9 @@
     <div id="add-event-section" style="display:none;">
         <h2>Add Event</h2>
         <form id="event-form">
-            <input type="text" name="title" placeholder="Title" required>
+            <select name="title" id="title-select" required style="margin-bottom:8px;">
+                <option value="">Select Title</option>
+            </select>
             <input type="datetime-local" name="start" required>
             <input type="datetime-local" name="end" required>
             <input type="text" name="location" placeholder="Location">
@@ -369,6 +371,23 @@
             }
         }
 
+        function loadTitles() {
+            fetch('title.json?ts=' + new Date().getTime())
+                .then(res => res.json())
+                .then(data => {
+                    const select = document.getElementById('title-select');
+                    select.innerHTML = '<option value="">Select Title</option>';
+                    data.forEach(title => {
+                        const opt = document.createElement('option');
+                        opt.value = title;
+                        opt.textContent = title;
+                        select.appendChild(opt);
+                    });
+                });
+        }
+
+        // Call loadTitles in addition to loadPersons
+        loadTitles();
         loadPersons();
         renderCalendar();
 
