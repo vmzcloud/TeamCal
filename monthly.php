@@ -14,13 +14,19 @@ $stmt = $db->prepare("SELECT * FROM events WHERE start BETWEEN ? AND ? ORDER BY 
 $stmt->execute([$firstDay . ' 00:00:00', $lastDay . ' 23:59:59']);
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Group events by date
+// Group events by date, sort each day's events by start time
 $eventsByDate = [];
 foreach ($events as $ev) {
     $date = substr($ev['start'], 0, 10);
     if (!isset($eventsByDate[$date])) $eventsByDate[$date] = [];
     $eventsByDate[$date][] = $ev;
 }
+foreach ($eventsByDate as &$evList) {
+    usort($evList, function($a, $b) {
+        return strcmp($a['start'], $b['start']);
+    });
+}
+unset($evList);
 
 // For navigation
 $prevMonth = $month == 1 ? 12 : $month - 1;

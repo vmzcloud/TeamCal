@@ -240,6 +240,8 @@
                 .then(res => res.json())
                 .then(data => {
                     const events = data.events || [];
+                    // Sort events by start time ascending
+                    events.sort((a, b) => a.start.localeCompare(b.start));
                     const special_days = data.special_days || [];
                     const specialMap = {};
                     special_days.forEach(sd => {
@@ -263,18 +265,18 @@
                             td.style.background = '';
                             td.style.border = '';
                         }
-                        events.filter(ev => {
-                            // Parse event start as local date
+                        // Filter and sort events for this day
+                        const dayEvents = events.filter(ev => {
                             const evDate = new Date(ev.start);
                             const evDay = evDate.getFullYear() + '-' +
                                           String(evDate.getMonth() + 1).padStart(2, '0') + '-' +
                                           String(evDate.getDate()).padStart(2, '0');
                             return evDay === day;
-                        }).forEach(ev => {
+                        }).sort((a, b) => a.start.localeCompare(b.start));
+                        dayEvents.forEach(ev => {
                             const personName = ev.person ? `<div style="font-size:0.95em;color:#1976d2;">👤 ${getPersonName(ev.person)}</div>` : '';
                             const location = ev.location ? `<div style="font-size:0.95em;color:#388e3c;">📍 ${ev.location}</div>` : '';
                             const desc = ev.description ? `<div style="font-size:0.95em;color:#555;">${ev.description}</div>` : '';
-                            // Add edit icon (link to edit_event.php?id=...)
                             const editIcon = `<a href="edit_event.php?id=${encodeURIComponent(ev.id)}" title="Edit Event" style="margin-left:6px;vertical-align:middle;"><span style="font-size:1.1em;cursor:pointer;">&#9998;</span></a>`;
                             const div = document.createElement('div');
                             div.className = 'event';
