@@ -43,6 +43,12 @@ if (file_exists(__DIR__ . '/persons.json')) {
 }
 // Parse selected persons as array
 $selected_persons = array_map('trim', explode(',', $event['person'] ?? ''));
+
+// Load title options from title.json
+$title_options = [];
+if (file_exists(__DIR__ . '/title.json')) {
+    $title_options = json_decode(file_get_contents(__DIR__ . '/title.json'), true);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -63,7 +69,12 @@ $selected_persons = array_map('trim', explode(',', $event['person'] ?? ''));
         <h2>Edit Event</h2>
         <form method="post">
             <label>Title
-                <input type="text" name="title" value="<?=htmlspecialchars($event['title'])?>" required>
+                <select name="title" required>
+                    <option value="">Select Title</option>
+                    <?php foreach ($title_options as $t): ?>
+                        <option value="<?=htmlspecialchars($t)?>" <?=($event['title'] === $t ? 'selected' : '')?>><?=htmlspecialchars($t)?></option>
+                    <?php endforeach; ?>
+                </select>
             </label>
             <label>Description
                 <input type="text" name="description" value="<?=htmlspecialchars($event['description'])?>">
