@@ -83,18 +83,19 @@
     </style>
 </head>
 <body>
+    <!-- Hidden menu button and menu -->
     <div style="position: relative; height: 0;">
         <button class="show-hide-btn" id="toggle-add-event" type="button" onclick="toggleAddEvent()">Show Add Event</button>
-        <a href="contact-list.php" style="position:absolute; left:120px; top:0; z-index:2;">
-            <button type="button" style="background:#4caf50; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:1em;">
-                Contact List
-            </button>
-        </a>
-        <a href="admin.php" style="position:absolute; left:0; top:0; z-index:2;">
-            <button type="button" style="background:#ff9800; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:1em;">
-                Admin Page
-            </button>
-        </a>
+        <!-- Hamburger menu button -->
+        <button id="menu-btn" type="button" style="position:absolute; left:0; top:0; z-index:3; background:#333; color:#fff; border:none; padding:8px 14px; border-radius:4px; cursor:pointer; font-size:1.5em;">
+            &#9776;
+        </button>
+        <!-- Hidden menu -->
+        <div id="side-menu" style="display:none; position:absolute; left:0; top:44px; z-index:10; background:#fff; border:1px solid #ccc; border-radius:6px; box-shadow:0 2px 8px #aaa; min-width:180px;">
+            <a href="admin.php" style="display:block; padding:12px 18px; color:#333; text-decoration:none; border-bottom:1px solid #eee;">Admin Page</a>
+            <a href="contact-list.php" style="display:block; padding:12px 18px; color:#333; text-decoration:none; border-bottom:1px solid #eee;">Contact List</a>
+            <a href="monthly.php" style="display:block; padding:12px 18px; color:#333; text-decoration:none;">Monthly View</a>
+        </div>
     </div>
     <div id="add-event-section" style="display:none;">
         <h2>Add Event</h2>
@@ -368,6 +369,19 @@
 
         loadPersons();
         renderCalendar();
+
+        // Hamburger menu toggle logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.getElementById('menu-btn');
+            const sideMenu = document.getElementById('side-menu');
+            document.addEventListener('click', function(e) {
+                if (menuBtn.contains(e.target)) {
+                    sideMenu.style.display = sideMenu.style.display === 'block' ? 'none' : 'block';
+                } else if (!sideMenu.contains(e.target)) {
+                    sideMenu.style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>
