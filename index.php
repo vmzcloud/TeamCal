@@ -136,7 +136,7 @@
         let currentDate = new Date();
         let persons = [];
 
-        // Load persons from JSON file and populate the select
+        // Load persons from JSON file and populate the checkboxes with "All" option
         function loadPersons() {
             fetch('persons.json?ts=' + new Date().getTime()) // prevent cache
                 .then(res => res.json())
@@ -144,16 +144,40 @@
                     persons = data;
                     const group = document.getElementById('person-checkbox-group');
                     group.innerHTML = '<label style="font-weight:bold;">Person:</label><br>';
+                    // Add "All" checkbox first
+                    group.innerHTML += `
+                        <label style="margin-right:12px;">
+                            <input type="checkbox" id="person_all" onchange="toggleAllPersons(this)" class="all-checkbox"> All
+                        </label>
+                    `;
                     persons.forEach(person => {
                         const id = 'person_' + person.name.replace(/\s+/g, '_');
                         group.innerHTML += `
                             <label style="margin-right:12px;">
-                                <input type="checkbox" name="person" value="${person.name}" id="${id}"> ${person.name}
+                                <input type="checkbox" name="person" value="${person.name}" id="${id}" class="person-checkbox"> ${person.name}
                             </label>
                         `;
                     });
                 });
         }
+
+        // Toggle all person checkboxes when "All" is checked/unchecked
+        function toggleAllPersons(allCheckbox) {
+            const checkboxes = document.querySelectorAll('#person-checkbox-group .person-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = allCheckbox.checked;
+            });
+        }
+
+        // If any person checkbox is unchecked, uncheck "All". If all are checked, check "All".
+        document.addEventListener('change', function(e) {
+            if (e.target.classList && e.target.classList.contains('person-checkbox')) {
+                const allCheckbox = document.getElementById('person_all');
+                const checkboxes = document.querySelectorAll('#person-checkbox-group .person-checkbox');
+                const allChecked = Array.from(checkboxes).length > 0 && Array.from(checkboxes).every(cb => cb.checked);
+                allCheckbox.checked = allChecked;
+            }
+        });
 
         function getWeekDates(date) {
             const d = new Date(date);
@@ -266,8 +290,8 @@
                 alert('End date/time cannot be earlier than start date/time.');
                 return;
             }
-            // Get checked persons as array and join with comma
-            const checked = Array.from(document.querySelectorAll('#person-checkbox-group input[type="checkbox"]:checked')).map(cb => cb.value);
+            // Get checked persons as array and join with comma, but ignore the "All" checkbox
+            const checked = Array.from(document.querySelectorAll('#person-checkbox-group input.person-checkbox:checked')).map(cb => cb.value);
             const data = {
                 title: form.title.value,
                 start: form.start.value,
