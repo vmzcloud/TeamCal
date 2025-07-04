@@ -16,7 +16,8 @@ if (!$event) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'] ?? '';
     $description = $_POST['description'] ?? '';
-    $person = $_POST['person'] ?? '';
+    // Get all checked persons as array and join with comma
+    $person = isset($_POST['person']) ? (is_array($_POST['person']) ? implode(', ', $_POST['person']) : $_POST['person']) : '';
     $location = $_POST['location'] ?? '';
     $start = $_POST['start'] ?? '';
     $end = $_POST['end'] ?? '';
@@ -35,11 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Load persons for dropdown
+// Load persons for checkboxes
 $persons = [];
 if (file_exists(__DIR__ . '/persons.json')) {
     $persons = json_decode(file_get_contents(__DIR__ . '/persons.json'), true);
 }
+// Parse selected persons as array
+$selected_persons = array_map('trim', explode(',', $event['person'] ?? ''));
 ?>
 <!DOCTYPE html>
 <html>
@@ -52,6 +55,7 @@ if (file_exists(__DIR__ . '/persons.json')) {
         input, textarea, select { width: 100%; padding: 8px; margin-top: 4px; }
         button { background: #2196f3; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 16px; }
         .back-btn { background: #888; margin-right: 8px; }
+        .person-checkbox-group label { display: inline-block; margin-right: 12px; margin-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -65,14 +69,15 @@ if (file_exists(__DIR__ . '/persons.json')) {
                 <input type="text" name="description" value="<?=htmlspecialchars($event['description'])?>">
             </label>
             <label>Person
-                <select name="person" required>
-                    <option value="">Select Person</option>
-                    <?php foreach ($persons as $p): ?>
-                        <option value="<?=htmlspecialchars($p['name'])?>"<?= $event['person'] == $p['name'] ? ' selected' : '' ?>>
-                            <?=htmlspecialchars($p['name'])?>
-                        </option>
+                <div class="person-checkbox-group" style="margin-bottom:8px;">
+                    <?php foreach ($persons as $p): 
+                        $checked = in_array($p['name'], $selected_persons) ? 'checked' : '';
+                    ?>
+                        <label>
+                            <input type="checkbox" name="person[]" value="<?=htmlspecialchars($p['name'])?>" <?=$checked?>> <?=htmlspecialchars($p['name'])?>
+                        </label>
                     <?php endforeach; ?>
-                </select>
+                </div>
             </label>
             <label>Location
                 <input type="text" name="location" value="<?=htmlspecialchars($event['location'])?>">
@@ -85,10 +90,6 @@ if (file_exists(__DIR__ . '/persons.json')) {
             </label>
             <button type="submit">Update Event</button>
             <a href="index.php" class="back-btn" style="background:#888; color:#fff; padding:8px 16px; border-radius:4px; text-decoration:none; margin-left:8px;">Cancel</a>
-        </form>
-    </div>
-</body>
-</html>
         </form>
     </div>
 </body>
