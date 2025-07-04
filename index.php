@@ -227,23 +227,40 @@
                 td.innerHTML = `<div class="events"></div>`;
                 row.appendChild(td);
             });
-            fetchEvents(weekDates[0]);
+            fetchEvents(weekDates[0], weekDates);
         }
 
-        function fetchEvents(sunday) {
+        // Update fetchEvents to handle special_days
+        function fetchEvents(sunday, weekDates) {
             fetch('calendar.php?date=' + sunday.toISOString().slice(0,10))
                 .then(res => res.json())
-                .then(events => {
-                    // Use local time for comparison
-                    const weekDates = getWeekDates(currentDate);
+                .then(data => {
+                    const events = data.events || [];
+                    const special_days = data.special_days || [];
+                    // Map special days by date for quick lookup
+                    const specialMap = {};
+                    special_days.forEach(sd => {
+                        specialMap[sd.date] = sd.description;
+                    });
+
                     const row = document.getElementById('week-row');
                     for (let i = 0; i < 7; i++) {
-                        // Get YYYY-MM-DD in local time for the cell
-                        const day = weekDates[i].getFullYear() + '-' +
-                                    String(weekDates[i].getMonth() + 1).padStart(2, '0') + '-' +
-                                    String(weekDates[i].getDate()).padStart(2, '0');
+                        const dt = weekDates[i];
+                        const day = dt.getFullYear() + '-' +
+                                    String(dt.getMonth() + 1).padStart(2, '0') + '-' +
+                                    String(dt.getDate()).padStart(2, '0');
                         const cell = row.children[i].querySelector('.events');
+                        const td = row.children[i];
                         cell.innerHTML = '';
+                        // Mark holiday cell
+                        if (specialMap[day]) {
+                            td.style.background = '#ffebee';
+                            td.style.border = '2px solid #d32f2f';
+                            cell.innerHTML += `<div style="color:#d32f2f;font-weight:bold;margin-bottom:4px;">${specialMap[day]}</div>`;
+                        } else {
+                            td.style.background = '';
+                            td.style.border = '';
+                        }
                         events.filter(ev => {
                             // Parse event start as local date
                             const evDate = new Date(ev.start);

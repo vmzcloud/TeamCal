@@ -10,8 +10,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt = $db->prepare("SELECT * FROM events WHERE start BETWEEN ? AND ?");
     $stmt->execute([$weekStart . ' 00:00:00', $weekEnd]);
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch special days for this week
+    $stmt2 = $db->prepare("SELECT date, description FROM special_day WHERE date BETWEEN ? AND ?");
+    $stmt2->execute([$weekStart, (new DateTime($weekStart))->modify('+6 days')->format('Y-m-d')]);
+    $special_days = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
     header('Content-Type: application/json');
-    echo json_encode($events);
+    echo json_encode([
+        'events' => $events,
+        'special_days' => $special_days
+    ]);
     exit;
 }
 

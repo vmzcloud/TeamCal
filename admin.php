@@ -77,6 +77,22 @@ if (isset($_POST['delete_id'])) {
     $stmt->execute([$event_id]);
 }
 
+// Handle add special day
+if (isset($_POST['special_date']) && isset($_POST['special_desc'])) {
+    $date = $_POST['special_date'];
+    $desc = $_POST['special_desc'];
+    if ($date) {
+        $stmt = $db->prepare("INSERT OR IGNORE INTO special_day (date, description) VALUES (?, ?)");
+        $stmt->execute([$date, $desc]);
+    }
+}
+
+// Handle delete special day
+if (isset($_POST['delete_special_id'])) {
+    $stmt = $db->prepare("DELETE FROM special_day WHERE id=?");
+    $stmt->execute([$_POST['delete_special_id']]);
+}
+
 // --- Month filter logic ---
 $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
 $month_start = $selected_month . '-01 00:00:00';
@@ -90,6 +106,9 @@ $months = $months_stmt->fetchAll(PDO::FETCH_COLUMN);
 $stmt = $db->prepare("SELECT * FROM events WHERE start >= ? AND start <= ? ORDER BY start DESC");
 $stmt->execute([$month_start, $month_end]);
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch all special days
+$special_days = $db->query("SELECT * FROM special_day ORDER BY date ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 // Pagination for audit log
 $audit_page = isset($_GET['audit_page']) ? max(1, intval($_GET['audit_page'])) : 1;
@@ -118,6 +137,8 @@ $audit_has_next = ($audit_page * $audit_limit) < $audit_total;
         .audit-nav button { background: #2196f3; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; }
         .month-select-form { margin-bottom: 18px; }
         .month-select-form select { font-size: 1em; padding: 4px 8px; }
+        .holiday-row { background: #ffebee; }
+        .holiday-label { color: #d32f2f; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -206,6 +227,57 @@ $audit_has_next = ($audit_page * $audit_limit) < $audit_total;
                 <a href="?audit_page=<?=($audit_page+1)?>"><button>Next &rarr;</button></a>
             <?php endif; ?>
         </div>
+
+        <h2>Special Day Management (Holiday)</h2>
+        <?php
+        // Get all years with special days for dropdown
+        $years_stmt = $db->query("SELECT DISTINCT strftime('%Y', date) as y FROM special_day ORDER BY y DESC");
+        $years = $years_stmt->fetchAll(PDO::FETCH_COLUMN);
+        $selected_year = isset($_GET['special_year']) ? $_GET['special_year'] : date('Y');
+        // Fetch special days for selected year
+        $special_days = $db->prepare("SELECT * FROM special_day WHERE strftime('%Y', date) = ? ORDER BY date ASC");
+        $special_days->execute([$selected_year]);
+        $special_days = $special_days->fetchAll(PDO::FETCH_ASSOC);
+        ?>
+        <form method="get" style="margin-bottom:12px;">
+            <label for="special_year">Show holidays for year:</label>
+            <select name="special_year" id="special_year" onchange="this.form.submit()">
+                <?php foreach ($years as $y): ?>
+                    <option value="<?=htmlspecialchars($y)?>"<?= $y == $selected_year ? ' selected' : '' ?>>
+                        <?=htmlspecialchars($y)?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+        <form method="post" style="margin-bottom:16px;">
+            <input type="date" name="special_date" required>
+            <input type="text" name="special_desc" placeholder="Description" required>
+            <button type="submit" style="background:#d32f2f; color:#fff; border:none; padding:6px 12px; border-radius:4px;">Add Holiday</button>
+        </form>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($special_days as $sd): ?>
+                <tr class="holiday-row">
+                    <td><?=htmlspecialchars($sd['date'])?></td>
+                    <td><?=htmlspecialchars($sd['description'])?></td>
+                    <td>
+                        <form method="post" style="display:inline;" onsubmit="return confirm('Delete this holiday?');">
+                            <input type="hidden" name="delete_special_id" value="<?=htmlspecialchars($sd['id'])?>">
+                            <button class="delete-btn" type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <hr>
     </div>
 </body>
 </html>

@@ -49,4 +49,11 @@ $db->exec("CREATE TABLE IF NOT EXISTS audit_log (
     title TEXT,
     description TEXT
 )");
+
+// Create special_day table if not exists
+$db->exec("CREATE TABLE IF NOT EXISTS special_day (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL UNIQUE,
+    description TEXT
+)");
 ?>
