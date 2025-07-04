@@ -115,6 +115,9 @@
             <div id="week-range" style="font-size:1em; color:#555; margin-top:4px;"></div>
             <div id="week-dates" style="font-size:1em; color:#888; margin-top:2px;"></div>
             <button class="today-btn" onclick="goToToday()" type="button">Today</button>
+            <!-- Goto date input and button -->
+            <input type="date" id="goto-date-input" style="margin-left:12px; font-size:1em; padding:4px 8px;">
+            <button class="today-btn" type="button" onclick="gotoDate()" style="margin-left:4px;">Go To</button>
         </div>
         <button class="arrow-btn" id="right-arrow-btn" onclick="changeWeek(1)" title="Next Week">&#8594;</button>
     </div>
@@ -350,6 +353,16 @@
                 section.style.display = 'none';
                 btn.textContent = 'Show Add Event';
                 rightArrow.style.display = '';
+            }
+        }
+
+        function gotoDate() {
+            const input = document.getElementById('goto-date-input');
+            if (input.value) {
+                currentDate = new Date(input.value);
+                renderCalendar();
+            } else {
+                alert('Please select a date.');
             }
         }
 
