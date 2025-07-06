@@ -9,9 +9,26 @@ $month = isset($_GET['month']) ? intval($_GET['month']) : date('n');
 $firstDay = date('Y-m-01', strtotime("$year-$month-01"));
 $lastDay = date('Y-m-t', strtotime($firstDay));
 
-// Fetch events for this month
-$stmt = $db->prepare("SELECT * FROM events WHERE start BETWEEN ? AND ? ORDER BY start ASC");
-$stmt->execute([$firstDay . ' 00:00:00', $lastDay . ' 23:59:59']);
+// Load title options from title.json
+$title_options = [];
+if (file_exists(__DIR__ . '/title.json')) {
+    $title_options = json_decode(file_get_contents(__DIR__ . '/title.json'), true);
+}
+
+// Get selected titles from GET
+$selected_titles = isset($_GET['titles']) && is_array($_GET['titles']) ? $_GET['titles'] : [];
+
+// Fetch events for this month, filter by title if selected
+$query = "SELECT * FROM events WHERE start BETWEEN ? AND ?";
+$params = [$firstDay . ' 00:00:00', $lastDay . ' 23:59:59'];
+if (!empty($selected_titles)) {
+    $in = implode(',', array_fill(0, count($selected_titles), '?'));
+    $query .= " AND title IN ($in)";
+    $params = array_merge($params, $selected_titles);
+}
+$query .= " ORDER BY start ASC";
+$stmt = $db->prepare($query);
+$stmt->execute($params);
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Group events by date, sort each day's events by start time
@@ -59,15 +76,33 @@ foreach ($stmt2->fetchAll(PDO::FETCH_ASSOC) as $sd) {
         .nav-btn { background: #2196f3; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 1em; margin: 0 8px; }
         .month-title { font-size: 2em; font-weight: bold; text-align: center; margin-bottom: 16px; }
         .back-btn { background: #888; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 16px; }
+        .filter-form { margin-bottom: 18px; }
+        .filter-form select { font-size: 1em; padding: 4px 8px; min-width: 180px; }
     </style>
 </head>
 <body>
     <div class="container">
         <a href="index.php"><button class="back-btn">&larr; Back to Weekly View</button></a>
+        <form method="get" class="filter-form" style="display:flex;align-items:center;gap:12px;">
+            <input type="hidden" name="year" value="<?=htmlspecialchars($year)?>">
+            <input type="hidden" name="month" value="<?=htmlspecialchars($month)?>">
+            <label for="titles">Filter by Title:</label>
+            <select name="titles[]" id="titles" multiple size="1" onchange="this.form.submit()">
+                <?php foreach ($title_options as $t): ?>
+                    <option value="<?=htmlspecialchars($t)?>"<?= in_array($t, $selected_titles) ? ' selected' : '' ?>><?=htmlspecialchars($t)?></option>
+                <?php endforeach; ?>
+            </select>
+            <noscript><button type="submit">Filter</button></noscript>
+            <?php if (!empty($selected_titles)): ?>
+                <a href="?year=<?=htmlspecialchars($year)?>&month=<?=htmlspecialchars($month)?>">
+                    <button type="button" style="background:#888; color:#fff; border:none; padding:6px 16px; border-radius:4px; cursor:pointer;">Reset Filter</button>
+                </a>
+            <?php endif; ?>
+        </form>
         <div class="month-title">
-            <a href="?year=<?=$prevYear?>&month=<?=$prevMonth?>"><button class="nav-btn">&larr;</button></a>
+            <a href="?year=<?=$prevYear?>&month=<?=$prevMonth?><?=!empty($selected_titles)?'&'.http_build_query(['titles'=>$selected_titles]):''?>"><button class="nav-btn">&larr;</button></a>
             <?=date('F Y', strtotime("$year-$month-01"))?>
-            <a href="?year=<?=$nextYear?>&month=<?=$nextMonth?>"><button class="nav-btn">&rarr;</button></a>
+            <a href="?year=<?=$nextYear?>&month=<?=$nextMonth?><?=!empty($selected_titles)?'&'.http_build_query(['titles'=>$selected_titles]):''?>"><button class="nav-btn">&rarr;</button></a>
         </div>
         <table>
             <thead>
