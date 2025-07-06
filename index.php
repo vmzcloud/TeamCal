@@ -31,8 +31,9 @@
             <input type="datetime-local" name="start" required>
             <input type="datetime-local" name="end" required>
             <input type="text" name="location" placeholder="Location">
-            <input type="text" name="description" placeholder="Description">
             <div id="person-checkbox-group" style="margin-bottom:8px;"></div>
+            <textarea name="description" placeholder="Description" rows="3" style="width:30%;margin-bottom:8px;"></textarea>
+            <br>
             <button type="submit" class="add-btn">Add</button>
         </form>
     </div>
