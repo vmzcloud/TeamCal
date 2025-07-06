@@ -23,6 +23,7 @@
         </div>
     </div>
     <div id="add-event-section" style="display:none;">
+        <br>
         <h2>Add Event</h2>
         <form id="event-form">
             <select name="title" id="title-select" required style="margin-bottom:8px;">
