@@ -1,0 +1,74 @@
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 14%; }
+th { background: #f0f0f0; }
+.event { background: #e0f7fa; margin: 2px 0; padding: 2px 4px; border-radius: 3px; }
+.header-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 20px;
+}
+.arrow-btn {
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    line-height: 1;
+}
+.calendar-title {
+    flex: 1;
+    text-align: center;
+    font-size: 2em;
+    font-weight: bold;
+}
+.today-btn {
+    margin-left: 16px;
+    background: #43a047;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+}
+.show-hide-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: #2196f3;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    z-index: 2;
+}
+#add-event-section {
+    margin-bottom: 24px;
+    background: #f9f9f9;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+.today-cell {
+    background: #fffde7 !important;
+    border: 2px solid #ffb300 !important;
+}
+.add-btn {
+    background: #43a047;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 8px;
+    transition: background 0.2s;
+}
+.add-btn:hover, .add-btn:focus {
+    background: #388e3c;
+}
