@@ -1,7 +1,12 @@
 [
-    { "id": 1, "name": "Gordon Wong", "office_tel": "1234 5678" },
-    { "id": 2, "name": "David Cheng", "office_tel": "2345 6789" },
-    { "id": 3, "name": "Benny Yeung", "office_tel": "3456 7890" },
-    { "id": 4, "name": "Oscar Lee", "office_tel": "4567 8901" },
-    { "id": 5, "name": "Peter Wong", "office_tel": "5678 9012" }
+    { "id": 1, "name": "Gordon Wong", "office_tel": "1234 5678", "Title": "Manager", "Location": "Mong Kok" },
+    { "id": 2, "name": "David Cheng", "office_tel": "2345 6789", "Title": "Developer", "Location": "Central" },
+    { "id": 3, "name": "Benny Yeung", "office_tel": "3456 7890", "Title": "Designer", "Location": "Tsim Sha Tsui" },
+    { "id": 4, "name": "Oscar Lee", "office_tel": "4567 8901", "Title": "Tester", "Location": "Causeway Bay" },
+    { "id": 5, "name": "Peter Wong", "office_tel": "5678 9012", "Title": "Support", "Location": "Wan Chai" },
+    { "id": 6, "name": "Alice Chan", "office_tel": "6789 0123", "Title": "HR", "Location": "Sheung Wan" },
+    { "id": 7, "name": "Cathy Ho", "office_tel": "7890 1234", "Title": "Marketing", "Location": "Mong Kok"},
+    { "id": 8, "name": "Frank Lam", "office_tel": "8901 2345", "Title": "Sales", "Location": "Admiralty" },
+    { "id": 9, "name": "Grace Ng", "office_tel": "9012 3456", "Title": "Finance", "Location": "Central" },
+    { "id": 10, "name": "Henry Lau", "office_tel": "0123 4567", "Title": "IT Support", "Location": "Tsim Sha Tsui" }
 ]

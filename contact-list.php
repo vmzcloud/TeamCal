@@ -17,6 +17,8 @@ if (file_exists($json_path)) {
         .contact-item { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; margin-bottom: 12px; padding: 16px; }
         .contact-name { font-weight: bold; font-size: 1.1em; }
         .contact-tel { color: #1976d2; margin-top: 4px; }
+        .contact-title { color: #388e3c; margin-top: 4px; }
+        .contact-location { color: #555; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -27,7 +29,9 @@ if (file_exists($json_path)) {
             <?php foreach ($persons as $person): ?>
                 <li class="contact-item">
                     <div class="contact-name"><?=htmlspecialchars($person['name'])?></div>
+                    <div class="contact-title"><?=htmlspecialchars($person['Title'] ?? '')?></div>
                     <div class="contact-tel"><?=htmlspecialchars($person['office_tel'] ?? '')?></div>
+                    <div class="contact-location"><?=htmlspecialchars($person['Location'] ?? '')?></div>
                 </li>
             <?php endforeach; ?>
         </ul>
