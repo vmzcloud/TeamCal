@@ -93,6 +93,33 @@ if (isset($_POST['delete_special_id'])) {
     $stmt->execute([$_POST['delete_special_id']]);
 }
 
+// Handle ICS import for holidays
+if (isset($_FILES['ics_file']) && $_FILES['ics_file']['error'] === UPLOAD_ERR_OK) {
+    $icsData = file_get_contents($_FILES['ics_file']['tmp_name']);
+    $lines = explode("\n", $icsData);
+    $date = '';
+    $desc = '';
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (strpos($line, 'DTSTART;VALUE=DATE:') === 0) {
+            $date = substr($line, 19);
+            // Format date as YYYY-MM-DD
+            $date = substr($date, 0, 4) . '-' . substr($date, 4, 2) . '-' . substr($date, 6, 2);
+        }
+        if (strpos($line, 'SUMMARY:') === 0) {
+            $desc = substr($line, 8);
+        }
+        if ($line === 'END:VEVENT' && $date && $desc) {
+            // Insert into special_day table
+            $stmt = $db->prepare("INSERT OR IGNORE INTO special_day (date, description) VALUES (?, ?)");
+            $stmt->execute([$date, $desc]);
+            $date = '';
+            $desc = '';
+        }
+    }
+    $import_message = "ICS holidays imported successfully.";
+}
+
 // --- Month filter logic ---
 $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
 $month_start = $selected_month . '-01 00:00:00';
@@ -254,6 +281,14 @@ $audit_has_next = ($audit_page * $audit_limit) < $audit_total;
             <input type="text" name="special_desc" placeholder="Description" required>
             <button type="submit" style="background:#d32f2f; color:#fff; border:none; padding:6px 12px; border-radius:4px;">Add Holiday</button>
         </form>
+        <h2>Import Holidays (ICS)</h2>
+        <form method="post" enctype="multipart/form-data" style="margin-bottom:24px;">
+            <input type="file" name="ics_file" accept=".ics" required>
+            <button type="submit" style="background:#2196f3; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">Import ICS</button>
+        </form>
+        <?php if (!empty($import_message)): ?>
+            <div style="color:#388e3c; margin-bottom:16px;"><?=htmlspecialchars($import_message)?></div>
+        <?php endif; ?>
         <table>
             <thead>
                 <tr>
