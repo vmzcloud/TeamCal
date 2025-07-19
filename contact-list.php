@@ -1,6 +1,6 @@
 <?php
 $persons = [];
-$json_path = __DIR__ . '/persons.json';
+$json_path = __DIR__ . '/data/persons.json';
 if (file_exists($json_path)) {
     $persons = json_decode(file_get_contents($json_path), true);
 }
@@ -19,13 +19,18 @@ if (file_exists($json_path)) {
         .contact-tel { color: #1976d2; margin-top: 4px; }
         .contact-title { color: #388e3c; margin-top: 4px; }
         .contact-location { color: #555; margin-top: 4px; }
+        .search-box { margin-bottom: 18px; width: 100%; }
+        .search-input { width: 80%; padding: 8px; font-size: 1em; border-radius: 4px; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
     <div class="container">
         <a href="index.php"><button type="button" class="back-btn">&larr; Back to Calendar</button></a>
         <h2>Contact List</h2>
-        <ul class="contact-list">
+        <div class="search-box">
+            <input type="text" id="search-input" class="search-input" placeholder="Search by name, title, location, or tel...">
+        </div>
+        <ul class="contact-list" id="contact-list">
             <?php foreach ($persons as $person): ?>
                 <li class="contact-item">
                     <div class="contact-name"><?=htmlspecialchars($person['name'])?></div>
@@ -36,5 +41,19 @@ if (file_exists($json_path)) {
             <?php endforeach; ?>
         </ul>
     </div>
+    <script>
+        // Simple client-side search
+        const input = document.getElementById('search-input');
+        const list = document.getElementById('contact-list');
+        const items = Array.from(list.getElementsByClassName('contact-item'));
+
+        input.addEventListener('input', function() {
+            const val = input.value.trim().toLowerCase();
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(val) ? '' : 'none';
+            });
+        });
+    </script>
 </body>
 </html>

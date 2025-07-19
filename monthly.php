@@ -9,10 +9,10 @@ $month = isset($_GET['month']) ? intval($_GET['month']) : date('n');
 $firstDay = date('Y-m-01', strtotime("$year-$month-01"));
 $lastDay = date('Y-m-t', strtotime($firstDay));
 
-// Load title options from title.json
+// Load title options from data/title.json
 $title_options = [];
-if (file_exists(__DIR__ . '/title.json')) {
-    $title_options = json_decode(file_get_contents(__DIR__ . '/title.json'), true);
+if (file_exists(__DIR__ . '/data/title.json')) {
+    $title_options = json_decode(file_get_contents(__DIR__ . '/data/title.json'), true);
 }
 
 // Get selected titles from GET

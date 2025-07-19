@@ -71,7 +71,7 @@
 
         // Load persons from JSON file and populate the checkboxes with "All" option
         function loadPersons() {
-            fetch('persons.json?ts=' + new Date().getTime()) // prevent cache
+            fetch('data/persons.json?ts=' + new Date().getTime()) // prevent cache
                 .then(res => res.json())
                 .then(data => {
                     persons = data;
@@ -299,7 +299,7 @@
         }
 
         function loadTitles() {
-            fetch('title.json?ts=' + new Date().getTime())
+            fetch('data/title.json?ts=' + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
                     const select = document.getElementById('title-select');

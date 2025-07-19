@@ -38,16 +38,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Load persons for checkboxes
 $persons = [];
-if (file_exists(__DIR__ . '/persons.json')) {
-    $persons = json_decode(file_get_contents(__DIR__ . '/persons.json'), true);
+if (file_exists(__DIR__ . '/data/persons.json')) {
+    $persons = json_decode(file_get_contents(__DIR__ . '/data/persons.json'), true);
 }
 // Parse selected persons as array
 $selected_persons = array_map('trim', explode(',', $event['person'] ?? ''));
 
 // Load title options from title.json
 $title_options = [];
-if (file_exists(__DIR__ . '/title.json')) {
-    $title_options = json_decode(file_get_contents(__DIR__ . '/title.json'), true);
+if (file_exists(__DIR__ . '/data/title.json')) {
+    $title_options = json_decode(file_get_contents(__DIR__ . '/data/title.json'), true);
 }
 ?>
 <!DOCTYPE html>

@@ -1,5 +1,33 @@
 <?php
-$db = new PDO('sqlite:' . __DIR__ . '/calendar.sqlite');
+// Ensure data folder exists
+$dataDir = __DIR__ . '/data';
+if (!is_dir($dataDir)) {
+    mkdir($dataDir, 0777, true);
+}
+
+// Auto-generate sample persons.json if not exists
+$personsFile = $dataDir . '/persons.json';
+if (!file_exists($personsFile)) {
+    file_put_contents($personsFile, json_encode([
+        [ "id"=>1, "name"=>"Gordon Wong", "office_tel"=>"1234 5678", "Title"=>"Manager", "Location"=>"Mong Kok" ],
+        [ "id"=>2, "name"=>"David Cheng", "office_tel"=>"2345 6789", "Title"=>"Developer", "Location"=>"Central" ]
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+// Auto-generate sample title.json if not exists
+$titleFile = $dataDir . '/title.json';
+if (!file_exists($titleFile)) {
+    file_put_contents($titleFile, json_encode([
+        "Online Meeting",
+        "On Leave",
+        "Onsite Support",
+        "Meeting",
+        "Training"
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+// Use SQLite in data folder
+$db = new PDO('sqlite:' . $dataDir . '/calendar.sqlite');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // Create events table if not exists

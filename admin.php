@@ -103,14 +103,12 @@ if (isset($_FILES['ics_file']) && $_FILES['ics_file']['error'] === UPLOAD_ERR_OK
         $line = trim($line);
         if (strpos($line, 'DTSTART;VALUE=DATE:') === 0) {
             $date = substr($line, 19);
-            // Format date as YYYY-MM-DD
             $date = substr($date, 0, 4) . '-' . substr($date, 4, 2) . '-' . substr($date, 6, 2);
         }
         if (strpos($line, 'SUMMARY:') === 0) {
             $desc = substr($line, 8);
         }
         if ($line === 'END:VEVENT' && $date && $desc) {
-            // Insert into special_day table
             $stmt = $db->prepare("INSERT OR IGNORE INTO special_day (date, description) VALUES (?, ?)");
             $stmt->execute([$date, $desc]);
             $date = '';
@@ -314,5 +312,7 @@ $audit_has_next = ($audit_page * $audit_limit) < $audit_total;
         </table>
         <hr>
     </div>
+</body>
+</html>
 </body>
 </html>
